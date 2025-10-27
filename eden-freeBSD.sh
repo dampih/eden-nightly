@@ -14,9 +14,6 @@ COUNT="$(git rev-list --count HEAD)"
 # hook the updater to check my repo
 git apply ../patches/update.patch
 
-#tempfix, remove when upstream fixed
-# git apply ../patches/tempfix.patch
-
 declare -a EXTRA_CMAKE_FLAGS=()
 if [[ "${TARGET}" == "FreeBSD-PGO" ]]; then
     EXTRA_CMAKE_FLAGS+=(

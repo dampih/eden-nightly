@@ -107,16 +107,6 @@ case "$1" in
 		BUNDLED_SDL2="ON"
   		EXTERNAL_SDL2="OFF"
         ;;
-    aarch64-pgo)
-        echo "Making Eden PGO Optimized Build for AArch64"
-        CMAKE_CXX_FLAGS="-march=armv8-a -mtune=generic -Ofast -pipe -flto=thin -fuse-ld=lld -fprofile-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
-        CMAKE_C_FLAGS="-march=armv8-a -mtune=generic -Ofast -pipe -flto=thin -fuse-ld=lld -fprofile-use=${GITHUB_WORKSPACE}/pgo/eden.profdata -fprofile-correction -w"
-  		CC="clang"
-		CXX="clang++"
-        TARGET="Linux-PGO"
-		BUNDLED_SDL2="ON"
-  		EXTERNAL_SDL2="OFF"
-        ;;
 esac
 
 cd ./eden
@@ -125,9 +115,6 @@ DATE="$(date +"%d_%m_%Y")"
 
 # hook the updater to check my repo
 git apply ../patches/update.patch
-
-#tempfix, remove when upstream fixed
-# git apply ../patches/tempfix.patch
 
 mkdir build
 cd build

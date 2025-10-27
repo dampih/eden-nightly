@@ -51,14 +51,6 @@ pacman -Syu --noconfirm \
 
 if [ "$(uname -m)" = 'x86_64' ]; then
 		pacman -Syu --noconfirm haskell-gnutls svt-av1
-
-		# Pin Clang verison 20.1.8 for now
-		wget -q --retry-connrefused --tries=30 https://archive.archlinux.org/packages/c/clang/clang-20.1.8-2-x86_64.pkg.tar.zst
-		wget -q --retry-connrefused --tries=30 https://archive.archlinux.org/packages/l/llvm/llvm-20.1.8-1-x86_64.pkg.tar.zst
-		wget -q --retry-connrefused --tries=30 https://archive.archlinux.org/packages/l/llvm-libs/llvm-libs-20.1.8-1-x86_64.pkg.tar.zst
-		wget -q --retry-connrefused --tries=30 https://archive.archlinux.org/packages/l/lld/lld-20.1.8-1-x86_64.pkg.tar.zst
-		sudo pacman -U --noconfirm ./*.pkg.tar.zst
-		rm -f ./*.pkg.tar.zst
 fi
 
 wget --retry-connrefused --tries=30 "$EXTRA_PACKAGES" -O ./get-debloated-pkgs.sh
