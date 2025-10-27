@@ -12,7 +12,6 @@ on:
         options:
           - all
           - windows
-          - windows-msys2
           - appimage
           - macos
           - android
@@ -236,6 +235,17 @@ jobs:
              target: PGO
              arch: x86_64
              runs-on: windows-2022
+           - toolchain: msys2
+             target: PGO
+             arch: x86_64
+             runs-on: windows-2022
+           - toolchain: msys2
+             target: normal
+             arch: x86_64
+             runs-on: windows-2022
+    defaults:
+      run:
+        shell: ${{ matrix.toolchain == 'msys2' && 'msys2 {0}' || 'bash {0}' }}
     env:
       TOOLCHAIN: ${{ matrix.toolchain }}
       ARCH: ${{ matrix.arch }}
@@ -247,36 +257,50 @@ jobs:
       - uses: actions/checkout@v5.0.0
 
       - name: Set up MSVC
+        if: ${{ matrix.toolchain != 'msys2' }}
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.arch }}
 
+      - name: Set up MSYS2
+        if: ${{ matrix.toolchain == 'msys2' }}
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: mingw64
+          update: true
+          cache: false
+          install: git make p7zip autoconf libtool autoconf-archive base-devel zip unzip automake-wrapper automake
+          pacboy: >-
+            toolchain:p clang:p lld:p ccache:p cmake:p ffmpeg:p ninja:p lz4:p qt6-base:p qt6-tools:p \
+            qt6-translations:p qt6-svg:p glslang:p boost:p zstd:p rapidjson:p python-pip:p nlohmann-json:p libusb:p vulkan-devel:p
+
       - name: Install Qt
+        if: ${{ matrix.toolchain != 'msys2' }}
         uses: jurplel/install-qt-action@v4.3.0
         with:
           version: '6.9.3'
           cache: 'true'
 
       - name: Install vulkan-sdk
+        if: ${{ matrix.toolchain != 'msys2' }}
         shell: powershell
         run: |
           ./install-vulkan-sdk.ps1
           
       - name: install ccache
-        if: ${{ matrix.target == 'normal' }}
+        if: ${{ matrix.toolchain != 'msys2' && matrix.target == 'normal' }}
         shell: bash
         run: |
           choco install ccache -y --no-progress
           
       - name: Update LLVM
-        if: ${{ matrix.toolchain == 'clang' }}
+        if: ${{ matrix.toolchain != 'msys2' && matrix.toolchain == 'clang' }}
         shell: bash
         run: |
           choco upgrade llvm --no-progress
           echo "C:/Program Files/LLVM/bin" >> $GITHUB_PATH
           
       - name: Clone Eden
-        shell: bash
         run: |
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
           cd ./eden
@@ -293,7 +317,6 @@ jobs:
             ${{ runner.os }}-ccache-${{ matrix.toolchain }}-${{ matrix.arch }}-
 
       - name: Compile Eden Windows
-        shell: bash
         run: |
           chmod +x ./eden-windows.sh
           ./eden-windows.sh
@@ -310,93 +333,6 @@ jobs:
 
       - name: Save ccache
         if: ${{ matrix.target == 'normal' && github.ref_name == 'main' }}
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ${{ steps.restore-ccache-windows.outputs.cache-primary-key }}
-
-      - name: Upload Eden 7z
-        uses: actions/upload-artifact@v5.0.0
-        with:
-          name: eden-windows-${{ matrix.toolchain }}-${{ matrix.target }}-7z-${{ matrix.arch }}
-          path: eden/build/artifacts/
-
-      - name: Upload Eden installer
-        uses: actions/upload-artifact@v5.0.0
-        with:
-          name: eden-windows-${{ matrix.toolchain }}-${{ matrix.target }}-installer-${{ matrix.arch }}
-          path: installer/artifacts/
-
-  windows-msys2:
-    if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'windows-msys2'
-    runs-on: windows-2022
-    name: "Windows MSYS2 (${{ matrix.target }})"
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-           - toolchain: msys2
-             target: PGO
-             arch: x86_64
-           - toolchain: msys2
-             target: normal
-             arch: x86_64
-    defaults:
-      run:
-        shell: msys2 {0}
-    env:
-      TOOLCHAIN: ${{ matrix.toolchain }}
-      TARGET: ${{ matrix.target }}
-      ARCH: ${{ matrix.arch }}
-      CCACHE_DIR: ${{ github.workspace }}/.ccache
-      CCACHE_COMPILERCHECK: content
-      CCACHE_SLOPPINESS: time_macros
-    steps:
-      - uses: actions/checkout@v5.0.0
-
-      - name: Set up MSYS2
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: mingw64
-          update: true
-          cache: false
-          install: git make p7zip autoconf libtool autoconf-archive base-devel zip unzip automake-wrapper automake
-          pacboy: >-
-            toolchain:p clang:p lld:p ccache:p cmake:p ffmpeg:p ninja:p lz4:p qt6-base:p qt6-tools:p qt6-translations:p qt6-svg:p glslang:p boost:p zstd:p rapidjson:p python-pip:p nlohmann-json:p libusb:p vulkan-devel:p
-
-      - name: Clone Eden
-        run: |
-          git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
-          cd ./eden
-          echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
-
-      - name: Restore ccache
-        if: ${{ matrix.target == 'normal' }}
-        uses: actions/cache/restore@v4
-        id: restore-ccache-windows
-        with:
-          path: ${{ env.CCACHE_DIR }}
-          key: ${{ runner.os }}-ccache-${{ matrix.toolchain }}-${{ matrix.arch }}-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-ccache-${{ matrix.toolchain }}-${{ matrix.arch }}-
-
-      - name: Compile Eden Windows MSYS2
-        run: |
-          chmod +x ./eden-windows.sh
-          ./eden-windows.sh
-
-      - name: Generate installer
-        shell: cmd
-        working-directory: ${{ github.workspace }}/installer
-        run: |
-          set TOOLCHAIN=%TOOLCHAIN%
-          if /I "%TARGET%"=="PGO" set TOOLCHAIN=PGO-%TOOLCHAIN%
-          makensis /DPRODUCT_TOOLCHAIN=%TOOLCHAIN% /DPRODUCT_VARIANT=%ARCH% /DPRODUCT_VERSION=%VERSION% eden.nsi
-          mkdir artifacts 2>nul
-          move /y *.exe artifacts\
-
-      - name: Save ccache
-#        if: ${{ matrix.target == 'normal' && github.ref_name == 'main' }}
         uses: actions/cache/save@v4
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -526,7 +462,7 @@ jobs:
   release:
     if: github.ref_name == 'main' && github.event.inputs.job_to_run == 'all'
     name: "release"
-    needs: [info, appimage, windows, windows-msys2, macos, android, freebsd]
+    needs: [info, appimage, windows, macos, android, freebsd]
     permissions:
       actions: read
       security-events: write

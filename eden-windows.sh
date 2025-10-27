@@ -93,6 +93,26 @@ fi
 # Gather dependencies
 if [[ "${TOOLCHAIN}" == "msys2" ]]; then
     export PATH="/mingw64/bin:${PATH}"
+    copy_deps() {
+        local target="$1"
+        objdump -p "$target" | awk '/DLL Name:/ {print $3}' | while read -r dll; do
+            [[ -z "$dll" ]] && continue
+            local dll_path
+            dll_path=$(command -v "$dll" 2>/dev/null || true)
+            [[ -z "$dll_path" ]] && continue
+
+            case "$dll_path" in
+                /c/Windows/System32/*|/c/Windows/SysWOW64/*) continue ;;
+            esac
+
+            local dest="./bin/$dll"
+            if [[ ! -f "$dest" ]]; then
+                cp -v "$dll_path" ./bin/
+                copy_deps "$dll_path"
+            fi
+        done
+    }
+    copy_deps ./bin/eden.exe
 fi
 windeployqt6 --release --no-compiler-runtime --no-opengl-sw --no-system-dxc-compiler --no-system-d3d-compiler --dir bin ./bin/eden.exe
 
