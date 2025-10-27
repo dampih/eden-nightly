@@ -271,7 +271,7 @@ jobs:
           cache: false
           install: git make p7zip autoconf libtool autoconf-archive base-devel zip unzip automake-wrapper automake
           pacboy: >-
-            toolchain:p clang:p lld:p ccache:p cmake:p ffmpeg:p ninja:p lz4:p qt6-base:p qt6-tools:p \
+            toolchain:p clang:p lld:p ccache:p cmake:p ffmpeg:p ninja:p lz4:p qt6-base:p qt6-tools:p
             qt6-translations:p qt6-svg:p glslang:p boost:p zstd:p rapidjson:p python-pip:p nlohmann-json:p libusb:p vulkan-devel:p
 
       - name: Install Qt
