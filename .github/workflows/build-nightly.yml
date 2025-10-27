@@ -367,6 +367,8 @@ jobs:
       - name: Clone Eden
         run: |
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
+          cd ./eden
+          echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
 
       - name: Restore ccache
         if: ${{ matrix.target == 'normal' }}
@@ -383,6 +385,16 @@ jobs:
           chmod +x ./eden-windows.sh
           ./eden-windows.sh
 
+      - name: Generate installer
+        shell: cmd
+        working-directory: ${{ github.workspace }}/installer
+        run: |
+          set TOOLCHAIN=%TOOLCHAIN%
+          if /I "%TARGET%"=="PGO" set TOOLCHAIN=PGO-%TOOLCHAIN%
+          makensis /DPRODUCT_TOOLCHAIN=%TOOLCHAIN% /DPRODUCT_VARIANT=%ARCH% /DPRODUCT_VERSION=%VERSION% eden.nsi
+          mkdir artifacts 2>nul
+          move /y *.exe artifacts\
+
       - name: Save ccache
 #        if: ${{ matrix.target == 'normal' && github.ref_name == 'main' }}
         uses: actions/cache/save@v4
@@ -390,11 +402,17 @@ jobs:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ steps.restore-ccache-windows.outputs.cache-primary-key }}
 
-      - name: Upload
+      - name: Upload Eden 7z
         uses: actions/upload-artifact@v5.0.0
         with:
-          name: eden-windows-msys2-${{ matrix.target }}
+          name: eden-windows-${{ matrix.toolchain }}-${{ matrix.target }}-7z-${{ matrix.arch }}
           path: eden/build/artifacts/
+
+      - name: Upload Eden installer
+        uses: actions/upload-artifact@v5.0.0
+        with:
+          name: eden-windows-${{ matrix.toolchain }}-${{ matrix.target }}-installer-${{ matrix.arch }}
+          path: installer/artifacts/
 
   macos:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'macos'
