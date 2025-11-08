@@ -24,7 +24,7 @@ jobs:
   info:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'info'
     runs-on: ubuntu-latest
-    name: "Get info"
+    name: "Changelog"
     strategy:
       matrix:
         target: [Info]
@@ -82,36 +82,38 @@ jobs:
         include:
           - target: steamdeck
             runs-on: ubuntu-latest
-            ccache: 'true'
+            optimize: Normal
+          - target: steamdeck
+            runs-on: ubuntu-latest
+            optimize: PGO
           - target: rog
             runs-on: ubuntu-latest
-            ccache: 'true'
+            optimize: Normal
+          - target: rog
+            runs-on: ubuntu-latest
+            optimize: PGO
           - target: common
             runs-on: ubuntu-latest
-            ccache: 'true'
+            optimize: Normal
+          - target: common
+            runs-on: ubuntu-latest
+            optimize: PGO
           - target: legacy
             runs-on: ubuntu-latest
-            ccache: 'true'
+            optimize: Normal
+          - target: legacy
+            runs-on: ubuntu-latest
+            optimize: PGO
           - target: aarch64
             runs-on: ubuntu-24.04-arm
-            ccache: 'true'
-          - target: steamdeck-pgo
-            runs-on: ubuntu-latest
-            ccache: 'flase'
-          - target: rog-pgo
-            runs-on: ubuntu-latest
-            ccache: 'flase'
-          - target: common-pgo
-            runs-on: ubuntu-latest
-            ccache: 'flase'
-          - target: legacy-pgo
-            runs-on: ubuntu-latest
-            ccache: 'flase'
+            optimize: Normal
     container: 
       image: ghcr.io/pkgforge-dev/archlinux:latest
       options: --privileged --device /dev/fuse
-    name: "Appimage (${{ matrix.target }})"
+    name: "Appimage ${{ matrix.target }} ${{ matrix.optimize }}"
     env:
+      TARGET: ${{ matrix.target }}
+      OPTIMIZE: ${{ matrix.optimize }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: time_macros
@@ -130,7 +132,7 @@ jobs:
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
 
       - name: Restore ccache for ${{ matrix.target }}
-        if: ${{ matrix.ccache == 'true'}}
+        if: ${{ matrix.optimize == 'Normal'}}
         uses: actions/cache/restore@v4
         id: restore-ccache-appimage
         with:
@@ -142,10 +144,10 @@ jobs:
       - name: Compile Eden ${{ matrix.target }}
         run: |
           chmod +x ./eden-appimage.sh
-          ./eden-appimage.sh ${{ matrix.target }}
+          ./eden-appimage.sh
 
       - name: Save ccache for ${{ matrix.target }}
-        if: ${{ matrix.ccache == 'true' && github.ref_name == 'main' }}
+        if: ${{ matrix.optimize == 'Normal' && github.ref_name == 'main' }}
         uses: actions/cache/save@v4
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -219,33 +221,33 @@ jobs:
   windows:
     if: github.event.inputs.job_to_run == 'all' || github.event.inputs.job_to_run == 'windows'
     runs-on: ${{ matrix.runs-on }}
-    name: "Windows ${{ matrix.toolchain }} ${{ matrix.target }} (${{ matrix.arch }})"
+    name: "Windows ${{ matrix.toolchain }} ${{ matrix.optimize }} (${{ matrix.arch }})"
     strategy:
       fail-fast: false
       matrix:
         include:
            - toolchain: msvc
-             target: normal
+             optimize: normal
              arch: x86_64
              runs-on: windows-2022
            - toolchain: msvc
-             target: normal
+             optimize: normal
              arch: arm64
              runs-on: windows-11-arm
            - toolchain: clang
-             target: normal
+             optimize: normal
              arch: x86_64
              runs-on: windows-2022
            - toolchain: clang
-             target: PGO
+             optimize: PGO
              arch: x86_64
              runs-on: windows-2022
            - toolchain: msys2
-             target: PGO
+             optimize: PGO
              arch: x86_64
              runs-on: windows-2022
            - toolchain: msys2
-             target: normal
+             optimize: normal
              arch: x86_64
              runs-on: windows-2022
     defaults:
@@ -254,7 +256,7 @@ jobs:
     env:
       TOOLCHAIN: ${{ matrix.toolchain }}
       ARCH: ${{ matrix.arch }}
-      TARGET: ${{ matrix.target }}
+      OPTIMIZE: ${{ matrix.optimize }}
       CCACHE_DIR: ${{ github.workspace }}/.ccache
       CCACHE_COMPILERCHECK: content
       CCACHE_SLOPPINESS: time_macros
@@ -291,13 +293,13 @@ jobs:
         run: |
           ./install-vulkan-sdk.ps1
           
-      - name: install ccache
-        if: ${{ matrix.toolchain != 'msys2' && matrix.target == 'normal' }}
+      - name: Install ccache
+        if: ${{ matrix.toolchain != 'msys2' && matrix.optimize == 'normal' }}
         shell: bash
         run: |
           choco install ccache -y --no-progress
           
-      - name: Update LLVM
+      - name: Install LLVM
         if: ${{ matrix.toolchain != 'msys2' && matrix.toolchain == 'clang' }}
         shell: powershell
         run: |
@@ -310,7 +312,7 @@ jobs:
           echo "VERSION=$(git rev-list --count HEAD)" >> "${GITHUB_ENV}"
 
       - name: Restore ccache
-        if: ${{ matrix.target == 'normal' }}
+        if: ${{ matrix.optimize == 'normal' }}
         uses: actions/cache/restore@v4
         id: restore-ccache-windows
         with:
@@ -329,13 +331,13 @@ jobs:
         working-directory: ${{ github.workspace }}/installer
         run: |
           set TOOLCHAIN=%TOOLCHAIN%
-          if /I "%TARGET%"=="PGO" set TOOLCHAIN=%TOOLCHAIN%-PGO
+          if /I "%OPTIMIZE%"=="PGO" set TOOLCHAIN=%TOOLCHAIN%-PGO
           makensis /DPRODUCT_TOOLCHAIN=%TOOLCHAIN% /DPRODUCT_VARIANT=%ARCH% /DPRODUCT_VERSION=%VERSION% eden.nsi
           mkdir artifacts 2>nul
           move /y *.exe artifacts\
 
       - name: Save ccache
-        if: ${{ matrix.target == 'normal' && github.ref_name == 'main' }}
+        if: ${{ matrix.optimize == 'normal' && github.ref_name == 'main' }}
         uses: actions/cache/save@v4
         with:
           path: ${{ env.CCACHE_DIR }}
@@ -344,13 +346,13 @@ jobs:
       - name: Upload Eden 7z
         uses: actions/upload-artifact@v5.0.0
         with:
-          name: eden-windows-${{ matrix.toolchain }}-${{ matrix.target }}-${{ matrix.arch }}-7z
+          name: eden-windows-${{ matrix.toolchain }}-${{ matrix.optimize }}-${{ matrix.arch }}-7z
           path: eden/build/artifacts/
 
       - name: Upload Eden installer
         uses: actions/upload-artifact@v5.0.0
         with:
-          name: eden-windows-${{ matrix.toolchain }}-${{ matrix.target }}-${{ matrix.arch }}-installer
+          name: eden-windows-${{ matrix.toolchain }}-${{ matrix.optimize }}-${{ matrix.arch }}-installer
           path: installer/artifacts/
 
   macos:
