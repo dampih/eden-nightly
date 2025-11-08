@@ -156,13 +156,13 @@ jobs:
       - name: Upload appimage
         uses: actions/upload-artifact@v5.0.0
         with:
-          name: eden-${{ matrix.target}}-appimage
+          name: eden-${{ matrix.target}}-${{ matrix.optimize }}-appimage
           path: eden/appimage
 
       - name: Upload appbundle
         uses: actions/upload-artifact@v5.0.0
         with:
-          name: eden-${{ matrix.target}}-appbundle
+          name: eden-${{ matrix.target}}-${{ matrix.optimize }}-appbundle
           path: eden/appbundle
 
   android:
