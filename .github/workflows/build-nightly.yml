@@ -238,14 +238,14 @@ jobs:
              optimize: normal
              arch: x86_64
              runs-on: windows-2022
-           - toolchain: clang
-             optimize: PGO
-             arch: x86_64
-             runs-on: windows-2022
-           - toolchain: msys2
-             optimize: PGO
-             arch: x86_64
-             runs-on: windows-2022
+#           - toolchain: clang
+#             optimize: PGO
+#             arch: x86_64
+#             runs-on: windows-2022
+#           - toolchain: msys2
+#             optimize: PGO
+#             arch: x86_64
+#             runs-on: windows-2022
            - toolchain: msys2
              optimize: normal
              arch: x86_64

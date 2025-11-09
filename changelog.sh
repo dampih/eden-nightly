@@ -99,19 +99,11 @@ echo "| Windows (MSVC) | **7z**<br>───────────────
 echo "| Windows (CLANG) | **7z**<br>────────────────<br>\
 [\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-clang-x86_64.7z)<br><br>\
 **Installer**<br>────────────────<br>\
-[\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-clang-x86_64-Installer.exe) | \
-**7z**<br>────────────────<br>\
-[\`x86_64-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-clang-PGO-x86_64.7z)<br><br>\
-**Installer**<br>────────────────<br>\
-[\`x86_64-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-clang-PGO-x86_64-Installer.exe) |" >> "$CHANGELOG_FILE"
+[\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-clang-x86_64-Installer.exe) |" >> "$CHANGELOG_FILE"
 echo "| Windows (MSYS2) | **7z**<br>────────────────<br>\
 [\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msys2-x86_64.7z)<br><br>\
 **Installer**<br>────────────────<br>\
-[\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msys2-x86_64-Installer.exe) | \
-**7z**<br>────────────────<br>\
-[\`x86_64-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msys2-PGO-x86_64.7z)<br><br>\
-**Installer**<br>────────────────<br>\
-[\`x86_64-PGO\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msys2-PGO-x86_64-Installer.exe) |" >> "$CHANGELOG_FILE"
+[\`x86_64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Windows-msys2-x86_64-Installer.exe) |" >> "$CHANGELOG_FILE"
 echo "| FreeBSD | [\`amd64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-FreeBSD-amd64.tar.gz) | " >> "$CHANGELOG_FILE"
 echo "| Solaris | [\`amd64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-Solaris-amd64.tar.gz) | " >> "$CHANGELOG_FILE"
 echo "| MacOS | [\`arm64\`](${BASE_DOWNLOAD_URL}/${TAG}/Eden-${COUNT}-MacOS-arm64.7z) |" >> "$CHANGELOG_FILE"
