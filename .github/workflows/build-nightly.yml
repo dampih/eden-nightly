@@ -455,7 +455,7 @@ jobs:
 
       - name: Compile Eden Solaris
         if: matrix.target == 'Solaris'
-        uses: vmactions/solaris-vm@v1.1.5
+        uses: vmactions/solaris-vm@v1.1.6
         with:
           usesh: true
           envs: 'TARGET'
