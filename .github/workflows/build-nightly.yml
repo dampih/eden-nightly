@@ -228,7 +228,7 @@ jobs:
            - toolchain: msvc
              optimize: normal
              arch: x86_64
-             runs-on: windows-2022
+             runs-on: windows-latest
            - toolchain: msvc
              optimize: normal
              arch: arm64
@@ -236,19 +236,19 @@ jobs:
            - toolchain: clang
              optimize: normal
              arch: x86_64
-             runs-on: windows-2022
+             runs-on: windows-latest
 #           - toolchain: clang
 #             optimize: PGO
 #             arch: x86_64
-#             runs-on: windows-2022
+#             runs-on: windows-latest
 #           - toolchain: msys2
 #             optimize: PGO
 #             arch: x86_64
-#             runs-on: windows-2022
+#             runs-on: windows-latest
            - toolchain: msys2
              optimize: normal
              arch: x86_64
-             runs-on: windows-2022
+             runs-on: windows-latest
     defaults:
       run:
         shell: ${{ matrix.toolchain == 'msys2' && 'msys2 {0}' || 'bash {0}' }}
@@ -277,7 +277,8 @@ jobs:
           cache: false
           install: autoconf automake-wrapper automake autoconf-archive base-devel git libtool make p7zip zip unzip
           pacboy: >-
-            boost:p ccache:p clang:p cmake:p enet:p glslang:p libusb:p lld:p llvm:p lz4:p mbedtls:p ninja:p nlohmann-json:p opus:p qt6-tools:p qt6-translations:p qt6-svg:p qt6-static:p rapidjson:p toolchain:p python-pip:p zlib:p zstd:p
+            boost:p ccache:p clang:p cmake:p enet:p glslang:p libusb:p lld:p llvm:p lz4:p mbedtls:p ninja:p nlohmann-json:p 
+            opus:p qt6-tools:p qt6-translations:p qt6-svg:p qt6-static:p rapidjson:p toolchain:p python-pip:p vulkan-memory-allocator:p vulkan-devel:p zlib:p zstd:p
             jbigkit:p xz:p libdeflate:p bzip2:p lerc:p graphite2:p crt-git:p libwebp:p libtiff:p brotli:p
 
       - name: Install Qt
@@ -325,6 +326,11 @@ jobs:
         run: |
           chmod +x ./eden-windows.sh
           ./eden-windows.sh
+
+      - name: Install NSIS
+        uses: repolevedavaj/install-nsis@v1.1.0
+        with:
+          nsis-version: '3.11'
 
       - name: Generate installer
         shell: cmd
