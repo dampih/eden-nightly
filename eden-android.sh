@@ -17,7 +17,7 @@ git apply ../patches/update.patch
 echo "   Done."
 
 if [ "$TARGET" = "Coexist" ]; then
-    # Change the App name and application ID to make it coexist with official build, and use different launcher icon
+    # Change the App name and application ID to make it coexist with official build
 	echo "-- Applying coexist patch..."
     git apply ../patches/coexist.patch
 	echo "   Done."
@@ -28,9 +28,9 @@ chmod +x ./gradlew
 
 CMAKE_FLAGS="-DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DENABLE_UPDATE_CHECKER=ON"
 echo "-- Extra CMake Flags:"
-echo "	 -DCMAKE_C_COMPILER_LAUNCHER=ccache"
-echo "	 -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
-echo "	 -DENABLE_UPDATE_CHECKER=ON"
+echo "   -DCMAKE_C_COMPILER_LAUNCHER=ccache"
+echo "   -DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+echo "   -DENABLE_UPDATE_CHECKER=ON"
 
 echo "-- Starting Gradle build..."
 if [ "$TARGET" = "Optimized" ]; then
