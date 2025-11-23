@@ -23,6 +23,11 @@ if [ "$TARGET" = "Coexist" ]; then
 	echo "   Done."
 fi        
 
+# hook apk installer
+echo "-- Applying apk installer patch..."
+git apply ../patches/androidupdater.patch
+echo "   Done."
+
 cd src/android
 chmod +x ./gradlew
 

@@ -89,33 +89,6 @@ index 01a413261e..0f6fc0f114 100644
 +    ).trim()
 +    return (commitCountString.toIntOrNull() ?: 1).toString()
  }
-diff --git a/src/android/app/src/main/java/org/yuzu/yuzu_emu/fragments/AboutFragment.kt b/src/android/app/src/main/java/org/yuzu/yuzu_emu/fragments/AboutFragment.kt
-index edd1b0765d..da22065ce8 100644
---- a/src/android/app/src/main/java/org/yuzu/yuzu_emu/fragments/AboutFragment.kt
-+++ b/src/android/app/src/main/java/org/yuzu/yuzu_emu/fragments/AboutFragment.kt
-@@ -85,6 +85,10 @@ class AboutFragment : Fragment() {
- 
-         binding.textVersionName.text = fullVersionText
-         binding.buttonVersionName.setOnClickListener {
-+            openLink(
-+                getString(R.string.nightly_link)
-+            )
-+
-             val clipBoard =
-                 requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-             val clip = ClipData.newPlainText(getString(R.string.build), fullVersionText)
-diff --git a/src/android/app/src/main/res/values/strings.xml b/src/android/app/src/main/res/values/strings.xml
-index 233e5afd43..d34555c427 100644
---- a/src/android/app/src/main/res/values/strings.xml
-+++ b/src/android/app/src/main/res/values/strings.xml
-@@ -448,6 +448,7 @@
-     <string name="x_link" translatable="false">https://x.com/edenemuofficial</string>
-     <string name="website_link" translatable="false">https://eden-emu.dev</string>
-     <string name="github_link" translatable="false">https://git.eden-emu.dev/eden-emu</string>
-+    <string name="nightly_link" translatable="false">https://github.com/pflyly/eden-nightly/releases/latest</string>
- 
-     <!-- General settings strings -->
-     <string name="frame_limit_enable">Limit speed</string>
 diff --git a/src/yuzu/about_dialog.cpp b/src/yuzu/about_dialog.cpp
 index 9f7597f471..b73cd41c1e 100644
 --- a/src/yuzu/about_dialog.cpp
