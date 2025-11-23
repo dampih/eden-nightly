@@ -16,17 +16,17 @@ echo "-- Applying updater patch..."
 git apply ../patches/update.patch
 echo "   Done."
 
+# hook apk fetcher and installer
+echo "-- Applying apk fetcher and installer patch..."
+git apply ../patches/android.patch
+echo "   Done."
+
 if [ "$TARGET" = "Coexist" ]; then
     # Change the App name and application ID to make it coexist with official build
 	echo "-- Applying coexist patch..."
     git apply ../patches/coexist.patch
 	echo "   Done."
 fi        
-
-# hook apk installer
-echo "-- Applying apk installer patch..."
-git apply ../patches/androidupdater.patch
-echo "   Done."
 
 cd src/android
 chmod +x ./gradlew

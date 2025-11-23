@@ -60,35 +60,6 @@ index 1ae608c085..f45c556d77 100644
 +set(BUILD_AUTO_UPDATE_REPO "pflyly/eden-nightly")
  
  configure_file(scm_rev.cpp.in scm_rev.cpp @ONLY)
-diff --git a/src/android/app/build.gradle.kts b/src/android/app/build.gradle.kts
-index 01a413261e..0f6fc0f114 100644
---- a/src/android/app/build.gradle.kts
-+++ b/src/android/app/build.gradle.kts
-@@ -306,18 +306,13 @@ fun runGitCommand(command: List<String>): String {
- }
- 
- fun getGitVersion(): String {
--    val gitVersion = runGitCommand(
-+    val commitCountString = runGitCommand(
-         listOf(
-             "git",
--            "describe",
--            "--always",
--            "--long"
-+            "rev-list",
-+            "--count",
-+            "HEAD"
-         )
--    ).replace(Regex("(-0)?-[^-]+$"), "")
--    val versionName = if (System.getenv("GITHUB_ACTIONS") != null) {
--        System.getenv("GIT_TAG_NAME") ?: gitVersion
--    } else {
--        gitVersion
--    }
--    return versionName.ifEmpty { "0.0" }
-+    ).trim()
-+    return (commitCountString.toIntOrNull() ?: 1).toString()
- }
 diff --git a/src/yuzu/about_dialog.cpp b/src/yuzu/about_dialog.cpp
 index 9f7597f471..b73cd41c1e 100644
 --- a/src/yuzu/about_dialog.cpp
