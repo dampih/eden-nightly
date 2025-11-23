@@ -441,9 +441,8 @@ jobs:
           git clone 'https://git.eden-emu.dev/eden-emu/eden.git' ./eden
 
       - name: Restore ccache
-        if: matrix.target == 'FreeBSD'
         uses: actions/cache/restore@v4
-        id: restore-ccache-freebsd
+        id: restore-ccache
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ${{ runner.os }}-${{ matrix.target }}-ccache-${{ github.run_id }}
@@ -466,17 +465,17 @@ jobs:
         uses: vmactions/solaris-vm@v1.1.6
         with:
           usesh: true
-          envs: 'TARGET'
+          envs: 'TARGET CCACHE_DIR CCACHE_COMPILERCHECK CCACHE_SLOPPINESS'
           run: |
             chmod +x ./BSD-dependencies.sh ./eden-BSD.sh
             ./BSD-dependencies.sh && ./eden-BSD.sh
 
       - name: Save ccache
-        if: matrix.target == 'FreeBSD' && github.ref_name == 'main'
+        if: github.ref_name == 'main'
         uses: actions/cache/save@v4
         with:
           path: ${{ env.CCACHE_DIR }}
-          key: ${{ steps.restore-ccache-freebsd.outputs.cache-primary-key }}
+          key: ${{ steps.restore-ccache.outputs.cache-primary-key }}
 
       - name: Upload
         uses: actions/upload-artifact@v5.0.0
